@@ -23,6 +23,17 @@ def test_health_endpoint():
     assert "gsk_" not in str(data)
     assert "key" not in data or data.get("key") is None
 
+def test_health_endpoints_all_aliases():
+    """Verify all health check paths (/api/health, /health, trailing slashes) return 200 OK."""
+    paths = ["/api/health", "/health", "/api/health/", "/health/"]
+    for path in paths:
+        response = client.get(path)
+        assert response.status_code == 200, f"Failed for path: {path}"
+        data = response.json()
+        assert data["status"] == "ok"
+        assert data["provider"] == "GroqCloud"
+        assert "version" in data
+
 def test_review_request_empty_code_rejected():
     """Verify Pydantic validation rejects empty or whitespace-only code."""
     with pytest.raises(ValidationError):

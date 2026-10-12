@@ -72,5 +72,5 @@ When configuring the **Web Service** on [Render](https://render.com):
 | **Root Directory** | `backend` | `.` (empty) |
 | **Build Command** | `pip install -r requirements.txt` | `pip install -r backend/requirements.txt` |
 | **Start Command** | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` | `uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT` |
-| **Environment Variables** | `GROQ_API_KEY=<your-key>`<br>`GROQ_MODEL=openai/gpt-oss-120b`<br>`CORS_ORIGINS=["https://<your-frontend>.onrender.com"]`<br>`PYTHON_VERSION=3.12.10` | Same |
+| **Environment Variables** | `GROQ_API_KEY=<your-key>`<br>`GROQ_MODEL=openai/gpt-oss-120b`<br>`CORS_ORIGINS=["https://codecrew-lemon-sigma.vercel.app"]`<br>`PYTHON_VERSION=3.12.10` | Same |
 

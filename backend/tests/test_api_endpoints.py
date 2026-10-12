@@ -334,3 +334,22 @@ def test_cors_preflight_allowed_and_blocked():
         "access-control-request-method": "POST"
     })
     assert blocked.headers.get("access-control-allow-origin") is None
+
+def test_cors_vercel_production_and_preview_origins():
+    """Verify production Vercel frontend and preview deployments pass CORS checks."""
+    # Production Vercel URL
+    prod = client.options("/api/health", headers={
+        "origin": "https://codecrew-lemon-sigma.vercel.app",
+        "access-control-request-method": "GET"
+    })
+    assert prod.status_code == 200
+    assert prod.headers.get("access-control-allow-origin") == "https://codecrew-lemon-sigma.vercel.app"
+
+    # Vercel preview branch URL
+    preview = client.options("/api/health", headers={
+        "origin": "https://codecrew-preview-branch-charan.vercel.app",
+        "access-control-request-method": "GET"
+    })
+    assert preview.status_code == 200
+    assert preview.headers.get("access-control-allow-origin") == "https://codecrew-preview-branch-charan.vercel.app"
+

@@ -71,3 +71,20 @@ npm run lint
 # Build production bundle
 npm run build
 ```
+
+---
+
+## Vercel Deployment Settings
+
+When deploying the frontend to [Vercel](https://vercel.com):
+
+| Setting | Value |
+| :--- | :--- |
+| **Framework Preset** | `Vite` |
+| **Root Directory** | `frontend` (or repo root with Root Directory setting) |
+| **Build Command** | `npm run build` |
+| **Output Directory** | `dist` |
+| **Environment Variables** | `VITE_API_BASE_URL=https://codecrew-plzo.onrender.com` |
+
+> **Note:** Do NOT set `VITE_API_BASE_URL` to the Vercel domain (`https://codecrew-lemon-sigma.vercel.app`), as that will cause API requests to hit the static frontend host and fail with HTTP 404. Also ensure no trailing slash is appended.
+

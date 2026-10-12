@@ -1,7 +1,11 @@
 import React from 'react';
 import { ExternalLink, Terminal, GitBranch } from 'lucide-react';
+import { resolveApiUrl } from '../services/api';
 
 export const Footer: React.FC = () => {
+  const docsUrl = resolveApiUrl('/docs');
+  const healthUrl = resolveApiUrl('/api/health');
+
   return (
     <footer className="border-t-[2.5px] border-[#28251F] bg-[#FFFCF4] mt-12 py-6 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-[#71695D]">
@@ -15,7 +19,7 @@ export const Footer: React.FC = () => {
 
         <div className="flex items-center flex-wrap gap-4">
           <a
-            href="http://127.0.0.1:8000/docs"
+            href={docsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 hover:text-[#28251F] hover:underline"
@@ -26,7 +30,7 @@ export const Footer: React.FC = () => {
           </a>
 
           <a
-            href="http://127.0.0.1:8000/api/health"
+            href={healthUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 hover:text-[#28251F] hover:underline"

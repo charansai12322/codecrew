@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({ health, healthLoading }) => {
           ) : (
             <div className="brutal-badge bg-[#E65B45] text-white">
               <ShieldAlert className="h-3 w-3" />
-              <span>BACKEND OFFLINE (PORT 8000)</span>
+              <span>BACKEND OFFLINE</span>
             </div>
           )}
 

@@ -33,6 +33,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -79,6 +80,8 @@ async def root():
 
 @app.get("/api/health", response_model=HealthResponse, tags=["Health"])
 @app.get("/health", response_model=HealthResponse, include_in_schema=False)
+@app.get("/api/health/", response_model=HealthResponse, include_in_schema=False)
+@app.get("/health/", response_model=HealthResponse, include_in_schema=False)
 async def get_health():
     """
     Returns sanitized health status, environment, and configuration readiness.

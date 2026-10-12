@@ -1,6 +1,61 @@
 import type { ReviewRequest, ReviewResponse, HealthStatus } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+/**
+ * Canonical production backend URL on Render.
+ */
+export const PRODUCTION_API_URL = 'https://codecrew-plzo.onrender.com';
+
+/**
+ * Resolves the base URL for the backend API.
+ * - In development mode, defaults to 'http://localhost:8000'
+ * - In production mode, if VITE_API_BASE_URL is not set or erroneously points to the frontend host,
+ *   defaults to PRODUCTION_API_URL ('https://codecrew-plzo.onrender.com')
+ */
+export function getApiBaseUrl(customEnvUrl?: string): string {
+  const envUrl = (customEnvUrl !== undefined ? customEnvUrl : (import.meta.env.VITE_API_BASE_URL || '')).trim();
+
+  if (envUrl) {
+    // Guard against misconfiguration where Vercel URL was assigned to VITE_API_BASE_URL:
+    // If the configured URL matches the current window's origin (e.g. https://codecrew-lemon-sigma.vercel.app),
+    // and there is no local backend server running on that origin, redirect to canonical backend.
+    if (typeof window !== 'undefined' && (envUrl === window.location.origin || envUrl.includes('vercel.app'))) {
+      return PRODUCTION_API_URL;
+    }
+    return envUrl;
+  }
+
+  // Development default
+  if (import.meta.env.DEV) {
+    return 'http://localhost:8000';
+  }
+
+  // Production default
+  return PRODUCTION_API_URL;
+}
+
+/**
+ * Resolves and normalizes an API endpoint URL against the base URL.
+ * Guarantees:
+ * - Strips any trailing slashes from the base URL (prevents double slash '//api/...')
+ * - Prevents duplicate '/api' prefix (e.g. base '.../api' + path '/api/health' -> '.../api/health')
+ * - Normalizes leading and trailing slashes on endpoint paths
+ */
+export function resolveApiUrl(endpoint: string, customBase?: string): string {
+  const base = (customBase !== undefined ? customBase : getApiBaseUrl()).trim();
+  const cleanBase = base.replace(/\/+$/, '');
+  let cleanPath = endpoint.replace(/^\/+/, '').replace(/\/+$/, '');
+
+  // If base already ends with '/api' (or is '/api')
+  if (cleanBase.endsWith('/api')) {
+    if (cleanPath === 'api') {
+      cleanPath = '';
+    } else if (cleanPath.startsWith('api/')) {
+      cleanPath = cleanPath.slice(4);
+    }
+  }
+
+  return cleanPath ? `${cleanBase}/${cleanPath}` : cleanBase;
+}
 
 export class ApiError extends Error {
   status: number;
@@ -19,8 +74,9 @@ export const apiService = {
    * Check backend health and configuration readiness.
    */
   async checkHealth(): Promise<HealthStatus> {
+    const healthUrl = resolveApiUrl('/api/health');
     try {
-      const response = await fetch(`${API_BASE}/api/health`, {
+      const response = await fetch(healthUrl, {
         method: 'GET',
         headers: { 'Accept': 'application/json' },
       });
@@ -33,7 +89,7 @@ export const apiService = {
     } catch (err: any) {
       if (err instanceof ApiError) throw err;
       throw new ApiError(
-        'Unable to connect to backend service. Ensure backend is running at http://localhost:8000',
+        'Unable to connect to backend service. Ensure backend is running and reachable.',
         0
       );
     }
@@ -52,11 +108,13 @@ export const apiService = {
       throw new ApiError('Submitted code exceeds the maximum allowed size of 50,000 characters.', 413);
     }
 
+    const reviewUrl = resolveApiUrl('/api/review');
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 120000); // 120s timeout
 
-      const response = await fetch(`${API_BASE}/api/review`, {
+      const response = await fetch(reviewUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
