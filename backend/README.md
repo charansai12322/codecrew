@@ -57,3 +57,20 @@ The server will start at:
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -v tests/
 ```
+
+---
+
+## Render Deployment Settings
+
+CodeCrew requires **Python 3.12** (pinned to `3.12.10` via `.python-version`) due to CrewAI (`Requires-Python: <3.14,>=3.10`).
+
+When configuring the **Web Service** on [Render](https://render.com):
+
+| Setting | Value (Recommended Monorepo) | Value (Repo Root) |
+| :--- | :--- | :--- |
+| **Runtime** | `Python` | `Python` |
+| **Root Directory** | `backend` | `.` (empty) |
+| **Build Command** | `pip install -r requirements.txt` | `pip install -r backend/requirements.txt` |
+| **Start Command** | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` | `uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port $PORT` |
+| **Environment Variables** | `GROQ_API_KEY=<your-key>`<br>`GROQ_MODEL=openai/gpt-oss-120b`<br>`CORS_ORIGINS=["https://<your-frontend>.onrender.com"]`<br>`PYTHON_VERSION=3.12.10` | Same |
+
