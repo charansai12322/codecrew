@@ -1,0 +1,21 @@
+/* Archival Brutalism Workbench Specific Layout Styles */
+
+.workbench-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .workbench-grid {
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+}
+
+.registration-mark {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--muted-ink);
+  user-select: none;
+}

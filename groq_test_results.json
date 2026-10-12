@@ -1,0 +1,114 @@
+{
+  "audit_version": "2.0.0",
+  "audit_phase": "Phase 2 — Independent Verification",
+  "timestamp": "2026-10-12T08:48:00Z",
+  "provider": "GroqCloud",
+  "target_model": "openai/gpt-oss-120b",
+  "verdict": "PASS WITH WARNINGS",
+  "verdict_rationale": "Core functional, provider, security, and resilience checks passed with 100% test success rate. Warnings documented for upstream Groq TPM/RPM free-tier limits, historical baseline token estimation, and CrewAI upstream deprecation warnings.",
+  "metrics": {
+    "total_tests": 99,
+    "passed_offline": 97,
+    "failed": 0,
+    "skipped_offline": 2,
+    "passed_with_live_flag": 98,
+    "backend_tests_count": 63,
+    "root_tests_count": 29,
+    "frontend_tests_count": 7,
+    "endpoints_discovered": 4,
+    "endpoints_tested": 4,
+    "agents_discovered": 3,
+    "agents_tested": 3,
+    "live_groq_calls": 6,
+    "offline_mock_tests": 93
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/",
+      "purpose": "Application info, status, and navigation catalog",
+      "tested": true,
+      "status_codes": [200]
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "aliases": ["/health"],
+      "purpose": "Readiness, environment, and sanitized LLM provider status",
+      "tested": true,
+      "status_codes": [200, 405]
+    },
+    {
+      "method": "POST",
+      "path": "/api/review",
+      "purpose": "Sequential 3-agent code analysis, fix generation, and verification",
+      "tested": true,
+      "status_codes": [200, 400, 401, 405, 422, 429, 502, 503, 504]
+    },
+    {
+      "method": "GET",
+      "path": "/docs",
+      "aliases": ["/openapi.json", "/redoc"],
+      "purpose": "OpenAPI interactive documentation and schema",
+      "tested": true,
+      "status_codes": [200]
+    }
+  ],
+  "agents": [
+    {
+      "name": "Code_Analyzer",
+      "role": "Senior Code Architect & Defect Analyst",
+      "model": "openai/gpt-oss-120b",
+      "provider": "GroqCloud",
+      "status": "VERIFIED"
+    },
+    {
+      "name": "Senior_Debugger",
+      "role": "Senior Python Systems Engineer & Debugger",
+      "model": "openai/gpt-oss-120b",
+      "provider": "GroqCloud",
+      "status": "VERIFIED"
+    },
+    {
+      "name": "code_reviewer",
+      "role": "Principal Code Quality Assurance Engineer",
+      "model": "openai/gpt-oss-120b",
+      "provider": "GroqCloud",
+      "status": "VERIFIED"
+    }
+  ],
+  "token_measurements": {
+    "sample_input": "def add_numbers(a, b): return a - b",
+    "prompt_tokens_measured": 4059,
+    "completion_tokens_measured": 2457,
+    "reasoning_tokens_measured": 42,
+    "total_tokens_measured": 6516,
+    "successful_model_requests": 9,
+    "end_to_end_latency_seconds": 5.95,
+    "baseline_comparison_status": "UNVERIFIED_ESTIMATE",
+    "baseline_notes": "Post-migration live measurement of 6,516 tokens is verified directly from GroqCloud provider usage headers. Historical pre-optimization baseline of ~9,700 tokens was derived from previous framework runs and is explicitly marked as an estimate to prevent fabricated metric claims."
+  },
+  "defects_and_remediations": [
+    {
+      "id": "DEF-001",
+      "title": "Groq 400 Invalid Request caused by CrewAI cache_breakpoint metadata",
+      "severity": "CRITICAL",
+      "root_cause": "CrewAI v1.15.27 injects cache_breakpoint into message dictionaries. Groq API strictly enforces its OpenAPI spec and rejects unknown message properties with HTTP 400.",
+      "remediation": "Narrow integration inside LiteLLM's GroqChatConfig transformation layer that automatically strips cache_breakpoint for Groq endpoints without mutating caller shared dictionaries or altering global litellm functions.",
+      "retest_status": "PASSED"
+    },
+    {
+      "id": "DEF-002",
+      "title": "Missing root endpoint GET / returning 404 Not Found",
+      "severity": "LOW",
+      "root_cause": "FastAPI app lacked a root route handler.",
+      "remediation": "Added GET / route returning app name, version, status, and navigation catalog.",
+      "retest_status": "PASSED"
+    }
+  ],
+  "warnings": [
+    "Groq free-tier rate limits (TPM/RPM) require paid tier for high-concurrency production deployments.",
+    "Upstream CrewAI v1.15.27 deprecation warnings logged for function_calling_llm and allow_code_execution.",
+    "Baseline savings percentage is labeled as an estimate rather than a measured historical Groq baseline."
+  ]
+}
